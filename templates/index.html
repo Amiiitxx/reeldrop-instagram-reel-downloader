@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>REELDROP — Instagram Downloader</title>
+    <title>REELDROP — Instagram Reel Downloader</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
@@ -13,7 +13,9 @@
 
 <body>
 
-    <!-- BACKGROUND GLOW -->
+    <!-- =========================
+         BACKGROUND GLOW
+    ========================== -->
     <div class="bg-glow glow-one"></div>
     <div class="bg-glow glow-two"></div>
 
@@ -69,13 +71,13 @@
 
 
             <h1>
-                Download Instagram<br>
-                <span>Reels & Posts.</span>
+                Save Your Favorite<br>
+                <span>Reels.</span>
             </h1>
 
 
             <p class="subtitle">
-                Paste a public Instagram Reel or Post URL and download
+                Paste a public Instagram Reel URL and download
                 the highest available quality.
             </p>
 
@@ -97,7 +99,7 @@
                             type="url"
                             id="url"
                             name="url"
-                            placeholder="Paste Instagram URL here..."
+                            placeholder="Paste Instagram Reel URL here..."
                             autocomplete="off"
                             required
                         >
@@ -105,6 +107,7 @@
                     </div>
 
 
+                    <!-- DOWNLOAD BUTTON -->
                     <button
                         type="submit"
                         id="downloadBtn"
@@ -119,6 +122,18 @@
                             class="spinner hidden"
                         ></span>
 
+                    </button>
+
+
+                    <!-- REFRESH BUTTON -->
+                    <button
+                        type="button"
+                        id="refreshBtn"
+                        class="refresh-btn"
+                        title="Clear and refresh"
+                        aria-label="Clear and refresh"
+                    >
+                        ↻
                     </button>
 
                 </form>
@@ -190,8 +205,8 @@
                     </h3>
 
                     <p>
-                        Downloads the highest quality media available
-                        from the source.
+                        Downloads the highest quality Reel
+                        available from the source.
                     </p>
 
                 </div>
@@ -213,8 +228,8 @@
                     </h3>
 
                     <p>
-                        Simple URL-based downloading with no
-                        unnecessary steps.
+                        Simple Reel URL-based downloading
+                        with no unnecessary steps.
                     </p>
 
                 </div>
@@ -236,7 +251,7 @@
                     </h3>
 
                     <p>
-                        Paste the link, click download,
+                        Paste the Reel link, click download,
                         and save your MP4.
                     </p>
 
@@ -260,12 +275,13 @@
 
                     <p>
                         No popups, no annoying advertisements,
-                        just a clean downloading experience.
+                        just a clean Reel downloading experience.
                     </p>
 
                 </div>
 
             </div>
+
 
         </section>
 
@@ -275,7 +291,7 @@
         ========================== -->
         <footer>
 
-            Download only content you have permission to save.
+            Download only Reels you have permission to save.
             Public content only.
 
             <br>
@@ -285,6 +301,7 @@
 
         </footer>
 
+
     </main>
 
 
@@ -293,93 +310,199 @@
     ========================== -->
     <script>
 
-        const form = document.getElementById("downloadForm");
+        /* =========================
+           ELEMENTS
+        ========================== */
 
-        const button = document.getElementById("downloadBtn");
+        const form =
+            document.getElementById("downloadForm");
 
-        const btnText = document.getElementById("btnText");
+        const urlInput =
+            document.getElementById("url");
 
-        const spinner = document.getElementById("spinner");
+        const button =
+            document.getElementById("downloadBtn");
 
-        const message = document.getElementById("message");
+        const refreshBtn =
+            document.getElementById("refreshBtn");
 
-        const result = document.getElementById("result");
+        const btnText =
+            document.getElementById("btnText");
 
-        const filename = document.getElementById("filename");
+        const spinner =
+            document.getElementById("spinner");
 
-        const downloadLink = document.getElementById("downloadLink");
+        const message =
+            document.getElementById("message");
 
+        const result =
+            document.getElementById("result");
+
+        const filename =
+            document.getElementById("filename");
+
+        const downloadLink =
+            document.getElementById("downloadLink");
+
+
+        /* =========================
+           DOWNLOAD FORM
+        ========================== */
 
         form.addEventListener("submit", async (event) => {
 
             event.preventDefault();
 
 
-            const url = document
-                .getElementById("url")
-                .value
-                .trim();
+            const url =
+                urlInput.value.trim();
 
 
-            /* Reset previous messages */
+            /* =========================
+               PREVENT EMPTY URL
+            ========================== */
+
+            if (!url) {
+
+                message.textContent =
+                    "Please enter an Instagram Reel URL.";
+
+                message.className =
+                    "message error";
+
+                return;
+            }
+
+
+            /* =========================
+               VALIDATE INSTAGRAM REEL
+            ========================== */
+
+            const isInstagram =
+                url.includes("instagram.com");
+
+            const isReel =
+                url.includes("/reel/") ||
+                url.includes("/reels/");
+
+
+            if (!isInstagram) {
+
+                message.textContent =
+                    "Please enter a valid Instagram URL.";
+
+                message.className =
+                    "message error";
+
+                return;
+            }
+
+
+            if (!isReel) {
+
+                message.textContent =
+                    "Please enter an Instagram Reel URL.";
+
+                message.className =
+                    "message error";
+
+                return;
+            }
+
+
+            /* =========================
+               RESET PREVIOUS MESSAGES
+            ========================== */
 
             message.textContent = "";
 
-            message.className = "message";
+            message.className =
+                "message";
 
             result.classList.add("hidden");
 
 
-            /* Loading state */
+            /* =========================
+               LOADING STATE
+            ========================== */
 
             button.disabled = true;
 
-            btnText.textContent = "Downloading...";
+            refreshBtn.disabled = true;
+
+            btnText.textContent =
+                "Downloading...";
 
             spinner.classList.remove("hidden");
 
 
             try {
 
-                const formData = new FormData();
+                const formData =
+                    new FormData();
 
-                formData.append("url", url);
-
-
-                const response = await fetch("/download", {
-
-                    method: "POST",
-
-                    body: formData
-
-                });
+                formData.append(
+                    "url",
+                    url
+                );
 
 
-                const data = await response.json();
+                /* =========================
+                   SEND DOWNLOAD REQUEST
+                ========================== */
+
+                const response =
+                    await fetch("/download", {
+
+                        method: "POST",
+
+                        body: formData
+
+                    });
 
 
-                if (!response.ok || !data.success) {
+                const data =
+                    await response.json();
+
+
+                /* =========================
+                   CHECK RESPONSE
+                ========================== */
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
 
                     throw new Error(
-                        data.message || "Download failed."
+                        data.message ||
+                        "Download failed."
                     );
 
                 }
 
 
-                /* Show result */
+                /* =========================
+                   SHOW RESULT
+                ========================== */
 
-                filename.textContent = data.filename;
+                filename.textContent =
+                    data.filename;
 
-                downloadLink.href = data.download_url;
+                downloadLink.href =
+                    data.download_url;
 
-                result.classList.remove("hidden");
+                result.classList.remove(
+                    "hidden"
+                );
 
 
-                /* Success message */
+                /* =========================
+                   SUCCESS MESSAGE
+                ========================== */
 
                 message.textContent =
-                    "Download prepared successfully.";
+                    "Reel download prepared successfully.";
 
                 message.className =
                     "message success";
@@ -387,7 +510,9 @@
 
             } catch (error) {
 
-                /* Error message */
+                /* =========================
+                   ERROR MESSAGE
+                ========================== */
 
                 message.textContent =
                     error.message;
@@ -398,18 +523,87 @@
 
             } finally {
 
-                /* Reset button */
+                /* =========================
+                   RESET BUTTON
+                ========================== */
 
                 button.disabled = false;
+
+                refreshBtn.disabled = false;
 
                 btnText.textContent =
                     "Download HD";
 
-                spinner.classList.add("hidden");
+                spinner.classList.add(
+                    "hidden"
+                );
 
             }
 
         });
+
+
+        /* =========================
+           REFRESH / RESET BUTTON
+        ========================== */
+
+        refreshBtn.addEventListener(
+            "click",
+            function () {
+
+                /* Clear URL */
+                urlInput.value = "";
+
+
+                /* Clear message */
+                message.textContent = "";
+
+                message.className =
+                    "message";
+
+
+                /* Hide download result */
+                result.classList.add(
+                    "hidden"
+                );
+
+
+                /* Remove old download link */
+                downloadLink.href = "#";
+
+
+                /* Clear filename */
+                filename.textContent = "";
+
+
+                /* Reset download button */
+                button.disabled = false;
+
+                refreshBtn.disabled = false;
+
+                btnText.textContent =
+                    "Download HD";
+
+                spinner.classList.add(
+                    "hidden"
+                );
+
+
+                /* Focus URL input */
+                urlInput.focus();
+
+
+                /* Scroll to top */
+                window.scrollTo({
+
+                    top: 0,
+
+                    behavior: "smooth"
+
+                });
+
+            }
+        );
 
     </script>
 

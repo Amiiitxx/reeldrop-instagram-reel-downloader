@@ -1,3 +1,12 @@
+/* ========================================
+   REELDROP — PREMIUM INSTAGRAM REEL DOWNLOADER
+   ======================================== */
+
+
+/* ========================================
+   ROOT VARIABLES
+======================================== */
+
 :root {
     --bg: #160720;
     --bg-dark: #3a0353;
@@ -34,6 +43,11 @@
 
 html {
     scroll-behavior: smooth;
+
+    /* Prevent white overscroll */
+    background: #160720;
+
+    overscroll-behavior-y: none;
 }
 
 body {
@@ -69,6 +83,19 @@ body {
         sans-serif;
 
     overflow-x: hidden;
+
+    /* Prevent white overscroll */
+    overscroll-behavior-y: none;
+}
+
+
+/* ========================================
+   PAGE SELECTION
+======================================== */
+
+::selection {
+    background: rgba(245, 158, 81, 0.30);
+    color: #ffffff;
 }
 
 
@@ -78,13 +105,22 @@ body {
 
 .bg-glow {
     position: fixed;
+
     pointer-events: none;
+
     z-index: -1;
 
     filter: blur(80px);
 
     opacity: 0.55;
+
+    border-radius: 50%;
+
+    will-change: transform;
 }
+
+
+/* Top-left glow */
 
 .glow-one {
     width: 320px;
@@ -94,7 +130,17 @@ body {
     left: -100px;
 
     background: rgba(128, 74, 138, 0.45);
+
+    animation:
+        glowFloatOne
+        9s
+        ease-in-out
+        infinite
+        alternate;
 }
+
+
+/* Bottom-right glow */
 
 .glow-two {
     width: 300px;
@@ -104,6 +150,61 @@ body {
     bottom: -80px;
 
     background: rgba(245, 158, 81, 0.22);
+
+    animation:
+        glowFloatTwo
+        11s
+        ease-in-out
+        infinite
+        alternate;
+}
+
+
+/* ========================================
+   BACKGROUND ANIMATIONS
+======================================== */
+
+@keyframes glowFloatOne {
+
+    0% {
+        transform:
+            translate3d(0, 0, 0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translate3d(45px, 25px, 0)
+            scale(1.08);
+    }
+
+    100% {
+        transform:
+            translate3d(-15px, 55px, 0)
+            scale(0.96);
+    }
+}
+
+
+@keyframes glowFloatTwo {
+
+    0% {
+        transform:
+            translate3d(0, 0, 0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translate3d(-40px, -25px, 0)
+            scale(1.10);
+    }
+
+    100% {
+        transform:
+            translate3d(20px, -55px, 0)
+            scale(0.95);
+    }
 }
 
 
@@ -113,6 +214,7 @@ body {
 
 .container {
     width: min(1120px, calc(100% - 40px));
+
     margin: auto;
 }
 
@@ -125,7 +227,9 @@ body {
     height: 86px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 }
 
@@ -136,18 +240,22 @@ body {
 
 .brand {
     display: flex;
+
     align-items: center;
 
     gap: 11px;
 
     font-size: 21px;
+
     font-weight: 800;
 
     letter-spacing: -0.5px;
 }
 
 
-/* LOGO IMAGE */
+/* ========================================
+   LOGO
+======================================== */
 
 .brand-logo {
     width: 42px;
@@ -170,26 +278,56 @@ body {
     transition:
         transform 0.25s ease,
         filter 0.25s ease;
+
+    animation:
+        logoFloat
+        3.5s
+        ease-in-out
+        infinite;
 }
 
 
-/* LOGO HOVER */
+/* Logo floating animation */
+
+@keyframes logoFloat {
+
+    0%,
+    100% {
+        transform:
+            translateY(0)
+            rotate(0deg);
+    }
+
+    50% {
+        transform:
+            translateY(-3px)
+            rotate(1deg);
+    }
+}
+
+
+/* Logo hover */
 
 .brand:hover .brand-logo {
-    transform: scale(1.05);
+    transform:
+        scale(1.08)
+        rotate(-2deg);
 
     filter:
         drop-shadow(
-            0 10px 25px
-            rgba(245, 158, 81, 0.28)
+            0 12px 28px
+            rgba(245, 158, 81, 0.32)
         );
 }
 
 
-/* BRAND TEXT */
+/* ========================================
+   BRAND TEXT
+======================================== */
 
 .brand-name {
     font-size: 21px;
+
     font-weight: 800;
 
     letter-spacing: -0.5px;
@@ -216,6 +354,7 @@ body {
 
 .badges {
     display: flex;
+
     align-items: center;
 
     gap: 9px;
@@ -242,7 +381,24 @@ body {
         rgba(128, 74, 138, 0.12);
 
     backdrop-filter: blur(12px);
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease;
 }
+
+
+.badge:hover {
+    transform: translateY(-2px);
+
+    background:
+        rgba(128, 74, 138, 0.22);
+
+    border-color:
+        rgba(248, 210, 153, 0.32);
+}
+
 
 .badge.ad-free {
     color: #ffdcae;
@@ -267,7 +423,7 @@ body {
 
 
 /* ========================================
-   EYEBROW
+   HERO ENTRANCE ANIMATION
 ======================================== */
 
 .eyebrow {
@@ -280,6 +436,70 @@ body {
     font-weight: 800;
 
     margin-bottom: 20px;
+
+    animation:
+        fadeUp
+        0.7s
+        ease-out
+        both;
+}
+
+
+.hero h1 {
+    animation:
+        heroReveal
+        0.9s
+        ease-out
+        0.08s
+        both;
+}
+
+
+.subtitle {
+    animation:
+        fadeUp
+        0.8s
+        ease-out
+        0.2s
+        both;
+}
+
+
+@keyframes heroReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(28px)
+            scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+@keyframes fadeUp {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
 }
 
 
@@ -310,6 +530,27 @@ h1 span {
     background-clip: text;
 
     color: transparent;
+
+    background-size: 200% 100%;
+
+    animation:
+        gradientText
+        5s
+        ease-in-out
+        infinite;
+}
+
+
+@keyframes gradientText {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 
@@ -362,6 +603,33 @@ h1 span {
 
         0 0 50px
         rgba(128, 74, 138, 0.10);
+
+    animation:
+        cardEntrance
+        0.9s
+        ease-out
+        0.3s
+        both;
+}
+
+
+@keyframes cardEntrance {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(25px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
 }
 
 
@@ -384,6 +652,7 @@ h1 span {
     flex: 1;
 
     display: flex;
+
     align-items: center;
 
     gap: 10px;
@@ -401,23 +670,43 @@ h1 span {
 
     transition:
         border-color 0.25s ease,
-        box-shadow 0.25s ease;
+        box-shadow 0.25s ease,
+        background 0.25s ease;
 }
+
 
 .input-wrap:focus-within {
     border-color:
         rgba(245, 158, 81, 0.45);
 
+    background:
+        rgba(255, 255, 255, 0.06);
+
     box-shadow:
         0 0 0 3px
-        rgba(245, 158, 81, 0.08);
+        rgba(245, 158, 81, 0.08),
+
+        0 0 25px
+        rgba(245, 158, 81, 0.06);
 }
+
 
 .link-icon {
     color: var(--orange);
 
     font-size: 19px;
+
+    transition:
+        transform 0.25s ease;
 }
+
+
+.input-wrap:focus-within .link-icon {
+    transform:
+        translateY(-1px)
+        rotate(-8deg);
+}
+
 
 input {
     width: 100%;
@@ -435,8 +724,14 @@ input {
     font-size: 14px;
 }
 
+
 input::placeholder {
     color: #98869d;
+}
+
+
+input:focus::placeholder {
+    opacity: 0.55;
 }
 
 
@@ -476,29 +771,37 @@ button,
     display: inline-flex;
 
     align-items: center;
+
     justify-content: center;
 
     transition:
-        transform 0.2s ease,
-        filter 0.2s ease,
-        box-shadow 0.2s ease;
+        transform 0.25s ease,
+        filter 0.25s ease,
+        box-shadow 0.25s ease;
 }
+
 
 button:hover,
 .save-btn:hover {
     filter: brightness(1.08);
 
-    transform: translateY(-1px);
+    transform:
+        translateY(-2px)
+        scale(1.02);
 
     box-shadow:
         0 14px 35px
         rgba(245, 158, 81, 0.28);
 }
 
+
 button:active,
 .save-btn:active {
-    transform: translateY(0);
+    transform:
+        translateY(0)
+        scale(0.97);
 }
+
 
 button:disabled {
     opacity: 0.65;
@@ -506,6 +809,47 @@ button:disabled {
     cursor: wait;
 
     transform: none;
+}
+
+
+/* ========================================
+   DOWNLOAD BUTTON SHINE
+======================================== */
+
+#downloadBtn {
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+#downloadBtn::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 80%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.30),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition: left 0.6s ease;
+}
+
+
+#downloadBtn:hover::before {
+    left: 140%;
 }
 
 
@@ -521,12 +865,43 @@ button:disabled {
     font-size: 12px;
 }
 
+
 .message.success {
     color: var(--orange-light);
+
+    animation:
+        fadeUp
+        0.35s
+        ease-out
+        both;
 }
+
 
 .message.error {
     color: var(--error);
+
+    animation:
+        shake
+        0.35s
+        ease-out
+        both;
+}
+
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
 }
 
 
@@ -563,11 +938,39 @@ button:disabled {
     text-align: left;
 
     backdrop-filter: blur(15px);
+
+    animation:
+        resultReveal
+        0.5s
+        ease-out
+        both;
 }
+
+
+@keyframes resultReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(15px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
 
 .result strong {
     font-size: 14px;
 }
+
 
 .result p {
     color: var(--muted);
@@ -581,10 +984,14 @@ button:disabled {
     overflow: hidden;
 
     text-overflow: ellipsis;
+
+    white-space: nowrap;
 }
+
 
 .success-icon {
     width: 36px;
+
     height: 36px;
 
     flex-shrink: 0;
@@ -592,6 +999,7 @@ button:disabled {
     border-radius: 50%;
 
     display: grid;
+
     place-items: center;
 
     background:
@@ -600,7 +1008,34 @@ button:disabled {
     color: var(--orange-light);
 
     font-weight: 900;
+
+    animation:
+        successPop
+        0.5s
+        ease-out
+        both;
 }
+
+
+@keyframes successPop {
+
+    0% {
+        transform: scale(0.5);
+
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.12);
+    }
+
+    100% {
+        transform: scale(1);
+
+        opacity: 1;
+    }
+}
+
 
 .save-btn {
     margin-left: auto;
@@ -614,7 +1049,7 @@ button:disabled {
 
 
 /* ========================================
-   FEATURES SECTION
+   FEATURES
 ======================================== */
 
 .features {
@@ -675,10 +1110,56 @@ button:disabled {
         border-color 0.3s ease,
         background 0.3s ease,
         box-shadow 0.3s ease;
+
+    animation:
+        featureReveal
+        0.7s
+        ease-out
+        both;
 }
 
 
-/* Soft shine */
+.feature:nth-child(1) {
+    animation-delay: 0.10s;
+}
+
+
+.feature:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+
+.feature:nth-child(3) {
+    animation-delay: 0.26s;
+}
+
+
+.feature:nth-child(4) {
+    animation-delay: 0.34s;
+}
+
+
+@keyframes featureReveal {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* ========================================
+   SOFT SHINE
+======================================== */
 
 .feature::before {
     content: "";
@@ -686,9 +1167,11 @@ button:disabled {
     position: absolute;
 
     width: 130px;
+
     height: 130px;
 
     top: -75px;
+
     right: -65px;
 
     border-radius: 50%;
@@ -699,12 +1182,14 @@ button:disabled {
     filter: blur(5px);
 
     transition:
-        transform 0.4s ease,
-        opacity 0.4s ease;
+        transform 0.5s ease,
+        opacity 0.5s ease;
 }
 
 
-/* Bottom glow */
+/* ========================================
+   BOTTOM GLOW
+======================================== */
 
 .feature::after {
     content: "";
@@ -712,6 +1197,7 @@ button:disabled {
     position: absolute;
 
     left: 25px;
+
     right: 25px;
 
     bottom: 0;
@@ -735,7 +1221,8 @@ button:disabled {
 ======================================== */
 
 .feature:hover {
-    transform: translateY(-7px);
+    transform:
+        translateY(-7px);
 
     border-color:
         rgba(245, 158, 81, 0.30);
@@ -755,8 +1242,10 @@ button:disabled {
         rgba(245, 158, 81, 0.07);
 }
 
+
 .feature:hover::before {
-    transform: scale(1.5);
+    transform:
+        scale(1.5);
 
     opacity: 0.9;
 }
@@ -768,12 +1257,15 @@ button:disabled {
 
 .feature-icon {
     position: relative;
+
     z-index: 2;
 
     min-width: 48px;
+
     height: 48px;
 
     display: grid;
+
     place-items: center;
 
     border-radius: 14px;
@@ -804,8 +1296,11 @@ button:disabled {
         box-shadow 0.3s ease;
 }
 
+
 .feature:hover .feature-icon {
-    transform: scale(1.08) rotate(-2deg);
+    transform:
+        scale(1.08)
+        rotate(-2deg);
 
     box-shadow:
         0 10px 25px
@@ -823,6 +1318,7 @@ button:disabled {
     z-index: 2;
 }
 
+
 .feature h3 {
     font-size: 14px;
 
@@ -832,6 +1328,7 @@ button:disabled {
 
     color: #fffaf5;
 }
+
 
 .feature p {
     color: var(--muted);
@@ -846,7 +1343,6 @@ button:disabled {
 
 /* ========================================
    4TH CARD
-   CENTER BELOW CARD 2
 ======================================== */
 
 .feature:nth-child(4) {
@@ -857,7 +1353,7 @@ button:disabled {
 
 
 /* ========================================
-   4TH CARD SPECIAL ACCENT
+   4TH CARD ACCENT
 ======================================== */
 
 .feature:nth-child(4) .feature-icon {
@@ -884,7 +1380,15 @@ footer {
     font-size: 10px;
 
     padding: 0 0 30px;
+
+    animation:
+        fadeUp
+        0.8s
+        ease-out
+        0.5s
+        both;
 }
+
 
 footer strong {
     color: var(--orange-light);
@@ -910,6 +1414,7 @@ footer strong {
 
 .spinner {
     width: 17px;
+
     height: 17px;
 
     border:
@@ -922,13 +1427,115 @@ footer strong {
     border-radius: 50%;
 
     animation:
-        spin 0.7s linear infinite;
+        spin
+        0.7s
+        linear
+        infinite;
 }
 
+
 @keyframes spin {
+
     to {
-        transform: rotate(360deg);
+        transform:
+            rotate(360deg);
     }
+}
+
+
+/* ========================================
+   REFRESH BUTTON
+======================================== */
+
+#downloadForm .refresh-btn {
+    width: 58px;
+
+    min-width: 58px;
+
+    height: 55px;
+
+    padding: 0;
+
+    border:
+        1px solid
+        rgba(248, 210, 153, 0.22);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: var(--orange-light);
+
+    font-size: 25px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    box-shadow: none;
+
+    transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        transform 0.35s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+/* Refresh hover */
+
+#downloadForm .refresh-btn:hover {
+    background:
+        linear-gradient(
+            135deg,
+            var(--orange-light),
+            var(--orange)
+        );
+
+    color: #2b0939;
+
+    border-color: transparent;
+
+    transform:
+        rotate(90deg);
+
+    box-shadow:
+        0 10px 25px
+        rgba(245, 158, 81, 0.22);
+
+    filter: none;
+}
+
+
+/* Refresh click */
+
+#downloadForm .refresh-btn:active {
+    transform:
+        rotate(180deg)
+        scale(0.94);
+}
+
+
+/* Refresh disabled */
+
+#downloadForm .refresh-btn:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+
+    filter: none;
 }
 
 
@@ -964,31 +1571,44 @@ footer strong {
             min(100% - 24px, 600px);
     }
 
+
     .hero {
         padding:
             65px 0 55px;
     }
 
+
     h1 {
-        letter-spacing: -2.5px;
+        letter-spacing:
+            -2.5px;
     }
+
 
     #downloadForm {
-        flex-direction: column;
+        flex-direction:
+            column;
     }
 
-    button {
+
+    .input-wrap {
         width: 100%;
     }
 
 
-    /* All cards one by one */
+    #downloadForm button:not(.refresh-btn) {
+        width: 100%;
+    }
+
+
+    /* Feature cards */
 
     .features {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
 
         gap: 14px;
     }
+
 
     .feature:nth-child(4) {
         grid-column: auto;
@@ -1007,10 +1627,13 @@ footer strong {
 
 
     .result {
-        align-items: flex-start;
+        align-items:
+            flex-start;
 
-        flex-wrap: wrap;
+        flex-wrap:
+            wrap;
     }
+
 
     .save-btn {
         width: 100%;
@@ -1018,9 +1641,11 @@ footer strong {
         margin-left: 0;
     }
 
+
     .badges {
         gap: 5px;
     }
+
 
     .badge {
         font-size: 8px;
@@ -1028,7 +1653,23 @@ footer strong {
         padding:
             7px 9px;
 
-        letter-spacing: 0.8px;
+        letter-spacing:
+            0.8px;
+    }
+
+
+    /* Mobile refresh */
+
+    #downloadForm .refresh-btn {
+        width: 58px;
+
+        min-width: 58px;
+
+        height: 55px;
+
+        align-self: center;
+
+        margin-top: 0;
     }
 }
 
@@ -1043,19 +1684,20 @@ footer strong {
         height: 72px;
     }
 
+
     .brand {
         font-size: 18px;
     }
 
 
-    /* Mobile logo */
-
     .brand-logo {
         width: 34px;
+
         height: 34px;
 
         border-radius: 8px;
     }
+
 
     .brand-name {
         font-size: 18px;
@@ -1066,19 +1708,25 @@ footer strong {
         display: none;
     }
 
+
     .hero {
-        padding-top: 55px;
+        padding-top:
+            55px;
     }
+
 
     .eyebrow {
         font-size: 9px;
 
-        letter-spacing: 2px;
+        letter-spacing:
+            2px;
     }
+
 
     .subtitle {
         font-size: 14px;
     }
+
 
     .feature {
         border-radius: 17px;
@@ -1086,12 +1734,47 @@ footer strong {
         padding: 19px;
     }
 
+
     .feature-icon {
         min-width: 44px;
+
         height: 44px;
     }
 
+
     .feature h3 {
         font-size: 13px;
+    }
+
+
+    #downloadForm .refresh-btn {
+        width: 54px;
+
+        min-width: 54px;
+
+        height: 52px;
+
+        font-size: 23px;
+    }
+}
+
+
+/* ========================================
+   REDUCED MOTION
+   Accessibility
+======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        scroll-behavior: auto !important;
+
+        transition-duration: 0.01ms !important;
     }
 }
