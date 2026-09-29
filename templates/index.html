@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REELDROP — Instagram Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="bg-glow glow-one"></div>
+<div class="bg-glow glow-two"></div>
+
+<main class="container">
+
+    <nav class="navbar">
+        <div class="brand">
+            <div class="brand-icon">I</div>
+            <span>REEL<span>DROP</span></span>
+        </div>
+        <div class="badge">HD DOWNLOADER</div>
+    </nav>
+
+    <section class="hero">
+        <div class="eyebrow">FAST • SIMPLE • HIGH QUALITY</div>
+
+        <h1>Download Instagram<br><span>Reels & Posts.</span></h1>
+
+        <p class="subtitle">
+            Paste a public Instagram Reel or Post URL and download
+            the highest available quality.
+        </p>
+
+        <div class="download-card">
+            <form id="downloadForm">
+                <div class="input-wrap">
+                    <span class="link-icon">↗</span>
+                    <input
+                        type="url"
+                        id="url"
+                        name="url"
+                        placeholder="Paste Instagram URL here..."
+                        autocomplete="off"
+                        required
+                    >
+                </div>
+
+                <button type="submit" id="downloadBtn">
+                    <span id="btnText">Download HD</span>
+                    <span id="spinner" class="spinner hidden"></span>
+                </button>
+            </form>
+
+            <div id="message" class="message"></div>
+        </div>
+
+        <div id="result" class="result hidden">
+            <div class="success-icon">✓</div>
+            <div>
+                <strong>Ready to download</strong>
+                <p id="filename"></p>
+            </div>
+            <a id="downloadLink" href="#" class="save-btn">Save MP4</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature">
+            <div class="feature-icon">HD</div>
+            <div>
+                <h3>Best Available Quality</h3>
+                <p>Downloads the highest quality media available from the source.</p>
+            </div>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">⚡</div>
+            <div>
+                <h3>Fast Processing</h3>
+                <p>Simple URL-based downloading with no unnecessary steps.</p>
+            </div>
+        </div>
+
+        <div class="feature">
+            <div class="feature-icon">↗</div>
+            <div>
+                <h3>Easy to Use</h3>
+                <p>Paste the link, click download, and save your MP4.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        Download only content you have permission to save. Public content only.
+    </footer>
+
+</main>
+
+<script>
+const form = document.getElementById("downloadForm");
+const button = document.getElementById("downloadBtn");
+const btnText = document.getElementById("btnText");
+const spinner = document.getElementById("spinner");
+const message = document.getElementById("message");
+const result = document.getElementById("result");
+const filename = document.getElementById("filename");
+const downloadLink = document.getElementById("downloadLink");
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const url = document.getElementById("url").value.trim();
+
+    message.textContent = "";
+    message.className = "message";
+    result.classList.add("hidden");
+
+    button.disabled = true;
+    btnText.textContent = "Downloading...";
+    spinner.classList.remove("hidden");
+
+    try {
+        const formData = new FormData();
+        formData.append("url", url);
+
+        const response = await fetch("/download", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Download failed.");
+        }
+
+        filename.textContent = data.filename;
+        downloadLink.href = data.download_url;
+        result.classList.remove("hidden");
+
+        message.textContent = "Download prepared successfully.";
+        message.className = "message success";
+
+    } catch (error) {
+        message.textContent = error.message;
+        message.className = "message error";
+    } finally {
+        button.disabled = false;
+        btnText.textContent = "Download HD";
+        spinner.classList.add("hidden");
+    }
+});
+</script>
+
+</body>
+</html>
