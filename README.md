@@ -33,11 +33,11 @@ A simple and modern **Flask-based Instagram Reel & Post Downloader** that lets y
 │                                             │
 │      Download Instagram Reels & Posts       │
 │                                             │
-│  ┌─────────────────────────┐ ┌───────────┐ │
-│  │ Paste Instagram URL...  │ │ Download  │ │
-│  └─────────────────────────┘ └───────────┘ │
+│  ┌─────────────────────────┐ ┌───────────┐  │
+│  │ Paste Instagram URL...  │ │ Download  │  │
+│  └─────────────────────────┘ └───────────┘  │
 │                                             │
-│        ⚡ Fast   •   HD   •   Simple        │
+│        ⚡ Fast   •   HD   •   Simple       │
 │                                             │
 └─────────────────────────────────────────────┘
 ```
