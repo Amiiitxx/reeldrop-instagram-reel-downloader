@@ -11,9 +11,10 @@ import yt_dlp
 
 app = Flask(__name__)
 
-# Vercel's deployment directory is read-only. Use temporary storage.
-# For reliable production downloads across serverless invocations, use
-# persistent object storage or stream the media directly to the response.
+# Vercel's deployment directory is read-only. Use temporary storage instead.
+# Note: Vercel temporary files and in-memory tokens are not persistent across
+# serverless invocations. For reliable production use, stream files directly
+# or store them in object storage (for example, S3 or compatible storage).
 BASE_DOWNLOAD_DIR = Path(
     os.environ.get(
         "DOWNLOAD_DIR",
@@ -26,17 +27,15 @@ VIDEO_EXTENSIONS = {".mp4", ".webm", ".mkv", ".mov"}
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 ALLOWED_EXTENSIONS = VIDEO_EXTENSIONS | IMAGE_EXTENSIONS
 
-# This in-memory token map works only while the same runtime instance remains
-# alive. It is suitable for local testing, not reliable persistent production.
+# Works only while the same runtime instance remains alive; not persistent.
 FILE_TOKENS = {}
 
 
 def is_instagram_url(url: str) -> bool:
-    """Allow Instagram reel, post, reels, and TV URLs."""
+    """Allow common Instagram Reel, post, reels, and TV URLs."""
     pattern = (
         r"^https?://(?:www\.)?instagram\.com/"
-        r"(?:reel|reels|p|tv)/"
-        r"[^/?#]+/?(?:\?.*)?$"
+        r"(?:reel|reels|p|tv)/[^/?#]+/?(?:\?.*)?$"
     )
     return bool(re.match(pattern, url.strip(), re.IGNORECASE))
 
@@ -64,6 +63,29 @@ def register_file(file_path: Path) -> str:
     return token
 
 
+def find_downloaded_file(directory: Path):
+    files = get_downloaded_files(directory)
+    if not files:
+        return None
+    return max(files, key=lambda item: item.stat().st_mtime)
+
+
+def response_for_file(file_path: Path):
+    media_type = get_media_type(file_path)
+    if not media_type:
+        return None
+    token = register_file(file_path)
+    return jsonify(
+        {
+            "success": True,
+            "filename": file_path.name,
+            "download_url": f"/file/{token}",
+            "media_type": media_type,
+            "extension": file_path.suffix.lower(),
+        }
+    )
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -79,18 +101,19 @@ def download():
     url = (request.form.get("url") or "").strip()
 
     if not url:
-        return jsonify({
-            "success": False,
-            "message": "Please enter an Instagram URL.",
-        }), 400
+        return jsonify(
+            {"success": False, "message": "Please enter an Instagram URL."}
+        ), 400
 
     if not is_instagram_url(url):
-        return jsonify({
-            "success": False,
-            "message": "Please enter a valid Instagram Reel or Post URL.",
-        }), 400
+        return jsonify(
+            {
+                "success": False,
+                "message": "Please enter a valid Instagram Reel or Post URL.",
+            }
+        ), 400
 
-    # Isolate each request so simultaneous downloads do not overwrite files.
+    # Each request gets its own folder to avoid filename collisions.
     request_dir = BASE_DOWNLOAD_DIR / uuid.uuid4().hex
     request_dir.mkdir(parents=True, exist_ok=True)
 
@@ -98,10 +121,11 @@ def download():
     gallery_error = ""
 
     ytdlp_options = {
-        "format": "bestvideo+bestaudio/best",
+        # Prefer one combined format to avoid requiring FFmpeg to merge streams.
+        # Some posts may not provide a combined format; those may still fail.
+        "format": "best",
         "outtmpl": str(request_dir / "%(title).80s-%(id)s.%(ext)s"),
         "noplaylist": True,
-        "merge_output_format": "mp4",
         "http_headers": {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -119,19 +143,13 @@ def download():
         with yt_dlp.YoutubeDL(ytdlp_options) as ydl:
             ydl.extract_info(url, download=True)
 
-        files = get_downloaded_files(request_dir)
-        if files:
-            latest = max(files, key=lambda item: item.stat().st_mtime)
-            media_type = get_media_type(latest)
-            if media_type:
-                token = register_file(latest)
-                return jsonify({
-                    "success": True,
-                    "filename": latest.name,
-                    "download_url": f"/file/{token}",
-                    "media_type": media_type,
-                    "extension": latest.suffix.lower(),
-                })
+        downloaded = find_downloaded_file(request_dir)
+        if downloaded:
+            result = response_for_file(downloaded)
+            if result:
+                return result
+
+        ytdlp_error = "yt-dlp completed but no supported media file was found."
 
     except yt_dlp.utils.DownloadError as exc:
         ytdlp_error = str(exc)
@@ -140,7 +158,7 @@ def download():
         ytdlp_error = str(exc)
         app.logger.exception("Unexpected yt-dlp error")
 
-    # Fall back to gallery-dl for supported image/carousel posts.
+    # Fallback for supported image/carousel posts. This may not help with Reels.
     try:
         result = subprocess.run(
             [
@@ -164,19 +182,11 @@ def download():
                 or "gallery-dl failed"
             )
         else:
-            files = get_downloaded_files(request_dir)
-            if files:
-                latest = max(files, key=lambda item: item.stat().st_mtime)
-                media_type = get_media_type(latest)
-                if media_type:
-                    token = register_file(latest)
-                    return jsonify({
-                        "success": True,
-                        "filename": latest.name,
-                        "download_url": f"/file/{token}",
-                        "media_type": media_type,
-                        "extension": latest.suffix.lower(),
-                    })
+            downloaded = find_downloaded_file(request_dir)
+            if downloaded:
+                response = response_for_file(downloaded)
+                if response:
+                    return response
             gallery_error = (
                 "gallery-dl completed, but no supported media file was found."
             )
@@ -189,37 +199,46 @@ def download():
 
     combined_error = f"{ytdlp_error} {gallery_error}".lower()
 
-    if any(term in combined_error for term in (
-        "login",
-        "authentication",
-        "redirect to login",
-        "requires login",
-    )):
+    # Check technical/server errors before classifying Instagram access errors.
+    if "ffmpeg is not installed" in combined_error or "ffmpeg not found" in combined_error:
+        status_code = 502
+        message = (
+            "The server cannot process this video because FFmpeg is unavailable. "
+            "Try another post or configure FFmpeg on the server."
+        )
+    elif any(
+        term in combined_error
+        for term in (
+            "login",
+            "authentication",
+            "redirect to login",
+            "requires login",
+            "empty media response",
+        )
+    ):
         status_code = 403
         message = (
-            "Instagram requires login access for this post. "
-            "Please try another publicly accessible post."
+            "Instagram did not provide media access for this post. "
+            "It may require login or be temporarily restricted. "
+            "Please try another public post."
         )
     elif "private" in combined_error:
         status_code = 403
-        message = "This Instagram account or post is private."
+        message = "This Instagram account or post appears to be private."
     else:
         status_code = 502
         message = (
             "Instagram could not provide downloadable media from this URL. "
-            "The post may be private, unavailable, or unsupported."
+            "The post may be unavailable, unsupported, or temporarily restricted."
         )
 
-    # Keep internal exception details in server logs, not the public response.
+    # Keep detailed internal errors in server logs, not in the public response.
     app.logger.warning(
         "Download failed. yt-dlp=%s | gallery-dl=%s",
         ytdlp_error[:1000],
         gallery_error[:1000],
     )
-    return jsonify({
-        "success": False,
-        "message": message,
-    }), status_code
+    return jsonify({"success": False, "message": message}), status_code
 
 
 @app.route("/file/<token>")
@@ -227,13 +246,15 @@ def get_file(token):
     file_path = FILE_TOKENS.get(token)
 
     if file_path is None:
-        return jsonify({
-            "success": False,
-            "message": (
-                "This temporary download is no longer available. "
-                "Please download the media again."
-            ),
-        }), 404
+        return jsonify(
+            {
+                "success": False,
+                "message": (
+                    "This temporary download is no longer available. "
+                    "Please download the media again."
+                ),
+            }
+        ), 404
 
     try:
         resolved_file = file_path.resolve()
