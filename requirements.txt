@@ -1,2 +1,4 @@
+
 Flask
-yt-dlp
+yt-dlp[default]
+gallery-dl
